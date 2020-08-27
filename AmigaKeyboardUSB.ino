@@ -1,3 +1,6 @@
+#include <HID.h>
+#include <Keyboard.h>
+
 #define BITMASK_A500CLK 0b00010000    // IO 8
 #define BITMASK_A500SP  0b00100000    // IO 9
 #define BITMASK_A500RES 0b01000000    // IO 10
@@ -12,7 +15,8 @@
 
 KeyReport _keyReport;
 uint32_t counter = 0;
-uint8_t Joy, MemoJoy1, MemoJoy2, state, bitn, key, fn,keydown, ktab[0x68]={
+uint8_t Joy, MemoJoy1, MemoJoy2, state, bitn, key, fn,keydown, ktab[0x68] =
+{
   // Tilde, 1-9, 0, sz, Accent, backslash, Num 0 (00 - 0F)
   0x35, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x2D, 0x2E, 0x31,    0, 0x62,
   // Q bis +, -, Num 1, Num 2, Num3 (10 - 1F)
@@ -47,14 +51,14 @@ void loop() {
   // Joystick 1
   Joy = ~PIND & BITMASK_JOY1;
   if (Joy != MemoJoy1) {
-    HID_SendReport(3, &Joy, 1);
+    HID().SendReport(3, &Joy, 1);
     MemoJoy1 = Joy;
   } 
 
 // Joystick 2
   Joy = ~PINF & BITMASK_JOY2;
   if (Joy != MemoJoy2) {
-    HID_SendReport(4, &Joy, 1);
+    HID().SendReport(4, &Joy, 1);
     MemoJoy2 = Joy;
   } 
  
@@ -152,7 +156,7 @@ void keypress(uint8_t k) {
       }
     }
   }
-  HID_SendReport(2,&_keyReport,8);
+  HID().SendReport(2,&_keyReport,8);
 }
 
 
@@ -164,7 +168,7 @@ void keyrelease(uint8_t k) {
       if (_keyReport.keys[i] == ktab[key]) _keyReport.keys[i] = 0;
     }
   }
-  HID_SendReport(2,&_keyReport,8);
+  HID().SendReport(2,&_keyReport,8);
 }
 
 
@@ -175,10 +179,9 @@ void keystroke(uint8_t k, uint8_t m) {
       if (_keyReport.keys[i] == 0) {
          _keyReport.keys[i] = k;
          _keyReport.modifiers = m;
-         HID_SendReport(2,&_keyReport,8);
+         HID().SendReport(2,&_keyReport,8);
          _keyReport.keys[i] = 0;
          _keyReport.modifiers = memomodifiers; // recover modifier state
-         HID_SendReport(2,&_keyReport,8);
          break;
       }
     }
